@@ -5,36 +5,58 @@ type JobSite struct {
 	vacancy []string
 }
 
-func (J *JobSite) addVacancies(vacancy string) {
+func (J *JobSite) AddVacancies(vacancy string) {
 	J.vacancy = append(J.vacancy, vacancy)
-	notifyAll()
+	J.notifyAll()
 }
 
-func (J *JobSite) removeVacancies(vacancy string) {
-	for i, v := range J.subs {
-		if v == vacancy {
-			copy(J.subs[i:], J.subs[i+1:])
-			J.subs[len(J.subs)-1] = nil // обнуляем "хвост"
-			J.subs = J.subs[:len(J.subs)-1]
-		}
-	}
-	return J.subs
-	notifyAll()
+func (J *JobSite) RemoveVacancies(vacancy string) {
+	J.vacancy = remove(J.vacancy, vacancy)
+	J.notifyAll()
 }
 
-func (J *JobSite) subscribe(observer Observer) {
+func (J *JobSite) Subscribe(observer Observer) {
 	J.subs = append(J.subs, observer)
 }
 
-func (J *JobSite) unsubscribe(observer Observer) {
-
+func (J *JobSite) Unsubscribe(observer Observer) {
+	for ind := range J.subs {
+		if J.subs[ind] == observer {
+			J.subs = removeObserver(J.subs, ind)
+			break
+		}
+	}
 }
 
 func (J *JobSite) notifyAll() {
-	for range J.subs {
-		Person.HandleEvent(J.vacancy)
+	for ind := range J.subs {
+		J.subs[ind].HandleEvent(J.vacancy)
 	}
-	//for (Observer observer: this.subscribers) {
-	//	observer.handleEvent(this.vacancies);
-	//}
+}
+
+func remove(arr []string, element string) []string {
+	for i, v := range arr {
+		if v == element {
+			copy(arr[i:], arr[i+1:])
+			arr[len(arr)-1] = ""
+			arr = arr[:len(arr)-1]
+		}
+	}
+	return arr
+}
+
+func removeObserver(arr []Observer, i int) []Observer {
+
+	copy(arr[i:], arr[i+1:])
+	arr[len(arr)-1] = nil
+	arr = arr[:len(arr)-1]
+
+	return arr
+}
+
+func NewJobSite() *JobSite {
+	jbs := new(JobSite)
+	jbs.subs = make([]Observer, 0, 5)
+	jbs.vacancy = make([]string, 0, 5)
+	return jbs
 }

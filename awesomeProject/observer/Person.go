@@ -13,3 +13,9 @@ func (P *Person) HandleEvent(vacancies []string) {
 		fmt.Println(vacancies[i])
 	}
 }
+
+func NewPerson(name string) *Person {
+	person := new(Person)
+	person.name = name
+	return person
+}
